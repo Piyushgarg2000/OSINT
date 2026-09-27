@@ -1,0 +1,134 @@
+/* ── Global Reset for OSINT Dashboard ────────────────────────────────── */
+
+:root {
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Theme Variables: DARK MODE (Default) */
+  --bg: #020617;
+  --card: #0F172A;
+  --cardSub: #1E293B;
+  --border: #334155;
+  --textMain: #F8FAFC;
+  --textMuted: #94A3B8;
+  --accent: #38BDF8;
+  --cyan: #06B6D4;
+  --success: #10B981;
+  --danger: #EF4444;
+  --warning: #F59E0B;
+  --purple: #8B5CF6;
+  --sidebar: #080F1F;
+  --topbar: #080F1F;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  /* Theme Variables: LIGHT MODE */
+  --bg: #F1F5F9;
+  --card: #FFFFFF;
+  --cardSub: #F8FAFC;
+  --border: #E2E8F0;
+  --textMain: #0F172A;
+  --textMuted: #64748B;
+  --accent: #0284C7;
+  --cyan: #0891B2;
+  --success: #059669;
+  --danger: #DC2626;
+  --warning: #D97706;
+  --purple: #7C3AED;
+  --sidebar: #F8FAFC;
+  --topbar: #FFFFFF;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;          /* prevent outer page scroll — only the main content area scrolls */
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--textMain);
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;           /* was center — breaks layout */
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--textMuted);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* ── Spinner animation for ML loading ─────────────────────────────────── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Base typography ──────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: var(--textMain);
+  margin: 0;
+}
+
+p { margin: 0; }
+
+code {
+  font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+  font-size: 13px;
+  padding: 2px 6px;
+  background: var(--cardSub);
+  border-radius: 4px;
+  color: var(--textMain);
+}
+
+/* ── Selection ────────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(56, 189, 248, 0.25);
+  color: var(--textMain);
+}
+
+/* ── Buttons (reset browser styles) ───────────────────────────────────── */
+button {
+  font-family: inherit;
+}
+
+/* ── Focus visible ────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

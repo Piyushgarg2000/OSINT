@@ -1,0 +1,666 @@
+{
+  "updated_at": "2026-09-17 22:50:57",
+  "total_table_items": 62612,
+  "total_analyzed_ips": 7611,
+  "sample_size": 62610,
+  "total_asns": 653,
+  "worst_asns": [
+    {
+      "asn": "AS16509",
+      "org": "AS16509 Amazon.com, Inc.",
+      "country": "Germany",
+      "infra_type": "ANYCAST CDN / DISTRIBUTED EDGE",
+      "infra_key": "ANYCAST_CDN",
+      "total_threat_ips": 619,
+      "category_counts": {
+        "attacks": 37,
+        "anonymizers": 24,
+        "reputation": 3,
+        "abuse": 31,
+        "malware": 1
+      },
+      "category_percentages": {
+        "attacks": 6.0,
+        "anonymizers": 3.9,
+        "reputation": 0.5,
+        "abuse": 5.0,
+        "malware": 0.2
+      },
+      "primary_threat": "attacks"
+    },
+    {
+      "asn": "AS206092",
+      "org": "AS206092 F.N.S. HOLDINGS LIMITED",
+      "country": "United States of America",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 341,
+      "category_counts": {
+        "abuse": 163,
+        "attacks": 21,
+        "malware": 1
+      },
+      "category_percentages": {
+        "abuse": 47.8,
+        "attacks": 6.2,
+        "malware": 0.3
+      },
+      "primary_threat": "abuse"
+    },
+    {
+      "asn": "AS16276",
+      "org": "AS16276 OVH SAS",
+      "country": "United States of America",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 311,
+      "category_counts": {
+        "attacks": 289,
+        "anonymizers": 6,
+        "abuse": 6,
+        "malware": 1
+      },
+      "category_percentages": {
+        "attacks": 92.9,
+        "anonymizers": 1.9,
+        "abuse": 1.9,
+        "malware": 0.3
+      },
+      "primary_threat": "attacks"
+    },
+    {
+      "asn": "AS8075",
+      "org": "AS8075 Microsoft Corporation",
+      "country": "Italy",
+      "infra_type": "ANYCAST CDN / DISTRIBUTED EDGE",
+      "infra_key": "ANYCAST_CDN",
+      "total_threat_ips": 301,
+      "category_counts": {
+        "organizations": 231,
+        "attacks": 28,
+        "reputation": 77,
+        "anonymizers": 5,
+        "abuse": 10
+      },
+      "category_percentages": {
+        "organizations": 76.7,
+        "attacks": 9.3,
+        "reputation": 25.6,
+        "anonymizers": 1.7,
+        "abuse": 3.3
+      },
+      "primary_threat": "organizations"
+    },
+    {
+      "asn": "AS45102",
+      "org": "AS45102 Alibaba (US) Technology Co., Ltd.",
+      "country": "Japan",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 245,
+      "category_counts": {
+        "reputation": 127,
+        "attacks": 11
+      },
+      "category_percentages": {
+        "reputation": 51.8,
+        "attacks": 4.5
+      },
+      "primary_threat": "reputation"
+    },
+    {
+      "asn": "AS45899",
+      "org": "AS45899 VNPT Corp",
+      "country": "Vietnam",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 237,
+      "category_counts": {
+        "anonymizers": 15,
+        "abuse": 5,
+        "attacks": 10
+      },
+      "category_percentages": {
+        "anonymizers": 6.3,
+        "abuse": 2.1,
+        "attacks": 4.2
+      },
+      "primary_threat": "anonymizers"
+    },
+    {
+      "asn": "AS62240",
+      "org": "AS62240 Clouvider",
+      "country": "United States of America",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 225,
+      "category_counts": {
+        "abuse": 104,
+        "malware": 3,
+        "attacks": 5,
+        "anonymizers": 1
+      },
+      "category_percentages": {
+        "abuse": 46.2,
+        "malware": 1.3,
+        "attacks": 2.2,
+        "anonymizers": 0.4
+      },
+      "primary_threat": "abuse"
+    },
+    {
+      "asn": "AS396982",
+      "org": "AS396982 Google LLC",
+      "country": "Taiwan",
+      "infra_type": "ANYCAST CDN / DISTRIBUTED EDGE",
+      "infra_key": "ANYCAST_CDN",
+      "total_threat_ips": 222,
+      "category_counts": {
+        "attacks": 194,
+        "reputation": 2,
+        "abuse": 2,
+        "anonymizers": 1
+      },
+      "category_percentages": {
+        "attacks": 87.4,
+        "reputation": 0.9,
+        "abuse": 0.9,
+        "anonymizers": 0.5
+      },
+      "primary_threat": "attacks"
+    },
+    {
+      "asn": "AS137409",
+      "org": "AS137409 GSL Networks Pty LTD",
+      "country": "Australia",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 211,
+      "category_counts": {
+        "abuse": 64,
+        "malware": 1
+      },
+      "category_percentages": {
+        "abuse": 30.3,
+        "malware": 0.5
+      },
+      "primary_threat": "abuse"
+    },
+    {
+      "asn": "AS211301",
+      "org": "AS211301 Unesty Company",
+      "country": "Germany",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 206,
+      "category_counts": {
+        "anonymizers": 13,
+        "attacks": 2
+      },
+      "category_percentages": {
+        "anonymizers": 6.3,
+        "attacks": 1.0
+      },
+      "primary_threat": "anonymizers"
+    },
+    {
+      "asn": "AS396356",
+      "org": "AS396356 Latitude.sh",
+      "country": "United States of America",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 200,
+      "category_counts": {
+        "abuse": 75,
+        "attacks": 3
+      },
+      "category_percentages": {
+        "abuse": 37.5,
+        "attacks": 1.5
+      },
+      "primary_threat": "abuse"
+    },
+    {
+      "asn": "AS396190",
+      "org": "AS396190 Leaseweb USA, Inc.",
+      "country": "United States of America",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 167,
+      "category_counts": {
+        "attacks": 167,
+        "anonymizers": 2
+      },
+      "category_percentages": {
+        "attacks": 100.0,
+        "anonymizers": 1.2
+      },
+      "primary_threat": "attacks"
+    },
+    {
+      "asn": "AS57026",
+      "org": "AS57026 JSC ER-Telecom Holding",
+      "country": "Russia",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 143,
+      "category_counts": {
+        "attacks": 143
+      },
+      "category_percentages": {
+        "attacks": 100.0
+      },
+      "primary_threat": "attacks"
+    },
+    {
+      "asn": "AS7922",
+      "org": "AS7922 Comcast Cable Communications, LLC",
+      "country": "United States of America",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 133,
+      "category_counts": {
+        "organizations": 130,
+        "attacks": 13,
+        "anonymizers": 1,
+        "abuse": 1
+      },
+      "category_percentages": {
+        "organizations": 97.7,
+        "attacks": 9.8,
+        "anonymizers": 0.8,
+        "abuse": 0.8
+      },
+      "primary_threat": "organizations"
+    },
+    {
+      "asn": "AS46516",
+      "org": "AS46516 HostRoyale LLC",
+      "country": "United States of America",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 126,
+      "category_counts": {
+        "abuse": 13
+      },
+      "category_percentages": {
+        "abuse": 10.3
+      },
+      "primary_threat": "abuse"
+    },
+    {
+      "asn": "AS5384",
+      "org": "AS5384 Emirates Internet",
+      "country": "United Arab Emirates",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 126,
+      "category_counts": {
+        "attacks": 16,
+        "reputation": 3
+      },
+      "category_percentages": {
+        "attacks": 12.7,
+        "reputation": 2.4
+      },
+      "primary_threat": "attacks"
+    },
+    {
+      "asn": "AS9009",
+      "org": "AS9009 M247 Europe SRL",
+      "country": "Canada",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 121,
+      "category_counts": {
+        "abuse": 8,
+        "attacks": 4
+      },
+      "category_percentages": {
+        "abuse": 6.6,
+        "attacks": 3.3
+      },
+      "primary_threat": "abuse"
+    },
+    {
+      "asn": "AS4811",
+      "org": "AS4811 China Telecom (Group)",
+      "country": "China",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 117,
+      "category_counts": {
+        "attacks": 112,
+        "anonymizers": 3
+      },
+      "category_percentages": {
+        "attacks": 95.7,
+        "anonymizers": 2.6
+      },
+      "primary_threat": "attacks"
+    },
+    {
+      "asn": "AS64080",
+      "org": "AS64080 SYN LTD",
+      "country": "United Kingdom",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 116,
+      "category_counts": {
+        "anonymizers": 94,
+        "abuse": 3
+      },
+      "category_percentages": {
+        "anonymizers": 81.0,
+        "abuse": 2.6
+      },
+      "primary_threat": "anonymizers"
+    },
+    {
+      "asn": "AS262287",
+      "org": "AS262287 Latitude.sh LTDA",
+      "country": "Brazil",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 95,
+      "category_counts": {
+        "anonymizers": 64,
+        "abuse": 2
+      },
+      "category_percentages": {
+        "anonymizers": 67.4,
+        "abuse": 2.1
+      },
+      "primary_threat": "anonymizers"
+    },
+    {
+      "asn": "AS202015",
+      "org": "AS202015 HZ Hosting Ltd",
+      "country": "United States of America",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 92,
+      "category_counts": {
+        "anonymizers": 73,
+        "abuse": 5
+      },
+      "category_percentages": {
+        "anonymizers": 79.3,
+        "abuse": 5.4
+      },
+      "primary_threat": "anonymizers"
+    },
+    {
+      "asn": "AS14618",
+      "org": "AS14618 Amazon.com, Inc.",
+      "country": "United States of America",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 85,
+      "category_counts": {
+        "abuse": 2,
+        "reputation": 19,
+        "malware": 1,
+        "attacks": 4,
+        "anonymizers": 1
+      },
+      "category_percentages": {
+        "abuse": 2.4,
+        "reputation": 22.4,
+        "malware": 1.2,
+        "attacks": 4.7,
+        "anonymizers": 1.2
+      },
+      "primary_threat": "reputation"
+    },
+    {
+      "asn": "AS4766",
+      "org": "AS4766 Korea Telecom",
+      "country": "South Korea",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 72,
+      "category_counts": {
+        "attacks": 57,
+        "abuse": 2,
+        "anonymizers": 1
+      },
+      "category_percentages": {
+        "attacks": 79.2,
+        "abuse": 2.8,
+        "anonymizers": 1.4
+      },
+      "primary_threat": "attacks"
+    },
+    {
+      "asn": "AS394380",
+      "org": "AS394380 Leaseweb USA, Inc.",
+      "country": "United States of America",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 66,
+      "category_counts": {
+        "attacks": 66,
+        "anonymizers": 19,
+        "abuse": 5
+      },
+      "category_percentages": {
+        "attacks": 100.0,
+        "anonymizers": 28.8,
+        "abuse": 7.6
+      },
+      "primary_threat": "attacks"
+    },
+    {
+      "asn": "AS3257",
+      "org": "AS3257 GTT Communications Inc.",
+      "country": "United States of America",
+      "infra_type": "RESIDENTIAL / ENTERPRISE ISP",
+      "infra_key": "RESIDENTIAL",
+      "total_threat_ips": 64,
+      "category_counts": {
+        "anonymizers": 1
+      },
+      "category_percentages": {
+        "anonymizers": 1.6
+      },
+      "primary_threat": "anonymizers"
+    }
+  ],
+  "dirty_hosters": [
+    {
+      "asn": "AS16276",
+      "org": "AS16276 OVH SAS",
+      "country": "United States of America",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 311,
+      "category_counts": {
+        "attacks": 289,
+        "anonymizers": 6,
+        "abuse": 6,
+        "malware": 1
+      },
+      "category_percentages": {
+        "attacks": 92.9,
+        "anonymizers": 1.9,
+        "abuse": 1.9,
+        "malware": 0.3
+      },
+      "primary_threat": "attacks"
+    },
+    {
+      "asn": "AS62240",
+      "org": "AS62240 Clouvider",
+      "country": "United States of America",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 225,
+      "category_counts": {
+        "abuse": 104,
+        "malware": 3,
+        "attacks": 5,
+        "anonymizers": 1
+      },
+      "category_percentages": {
+        "abuse": 46.2,
+        "malware": 1.3,
+        "attacks": 2.2,
+        "anonymizers": 0.4
+      },
+      "primary_threat": "abuse"
+    },
+    {
+      "asn": "AS396190",
+      "org": "AS396190 Leaseweb USA, Inc.",
+      "country": "United States of America",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 167,
+      "category_counts": {
+        "attacks": 167,
+        "anonymizers": 2
+      },
+      "category_percentages": {
+        "attacks": 100.0,
+        "anonymizers": 1.2
+      },
+      "primary_threat": "attacks"
+    },
+    {
+      "asn": "AS9009",
+      "org": "AS9009 M247 Europe SRL",
+      "country": "Canada",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 121,
+      "category_counts": {
+        "abuse": 8,
+        "attacks": 4
+      },
+      "category_percentages": {
+        "abuse": 6.6,
+        "attacks": 3.3
+      },
+      "primary_threat": "abuse"
+    },
+    {
+      "asn": "AS202015",
+      "org": "AS202015 HZ Hosting Ltd",
+      "country": "United States of America",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 92,
+      "category_counts": {
+        "anonymizers": 73,
+        "abuse": 5
+      },
+      "category_percentages": {
+        "anonymizers": 79.3,
+        "abuse": 5.4
+      },
+      "primary_threat": "anonymizers"
+    },
+    {
+      "asn": "AS394380",
+      "org": "AS394380 Leaseweb USA, Inc.",
+      "country": "United States of America",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 66,
+      "category_counts": {
+        "attacks": 66,
+        "anonymizers": 19,
+        "abuse": 5
+      },
+      "category_percentages": {
+        "attacks": 100.0,
+        "anonymizers": 28.8,
+        "abuse": 7.6
+      },
+      "primary_threat": "attacks"
+    },
+    {
+      "asn": "AS59253",
+      "org": "AS59253 LEASEWEB SINGAPORE PTE. LTD.",
+      "country": "Singapore",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 63,
+      "category_counts": {
+        "anonymizers": 44,
+        "abuse": 7
+      },
+      "category_percentages": {
+        "anonymizers": 69.8,
+        "abuse": 11.1
+      },
+      "primary_threat": "anonymizers"
+    },
+    {
+      "asn": "AS212238",
+      "org": "AS212238 Datacamp Limited",
+      "country": "Poland",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 31,
+      "category_counts": {
+        "attacks": 2,
+        "anonymizers": 3
+      },
+      "category_percentages": {
+        "attacks": 6.5,
+        "anonymizers": 9.7
+      },
+      "primary_threat": "anonymizers"
+    },
+    {
+      "asn": "AS396362",
+      "org": "AS396362 Leaseweb USA, Inc.",
+      "country": "United States of America",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 22,
+      "category_counts": {
+        "anonymizers": 14,
+        "abuse": 4
+      },
+      "category_percentages": {
+        "anonymizers": 63.6,
+        "abuse": 18.2
+      },
+      "primary_threat": "anonymizers"
+    },
+    {
+      "asn": "AS20473",
+      "org": "AS20473 The Constant Company, LLC",
+      "country": "United States of America",
+      "infra_type": "DATACENTER / VPN INFRASTRUCTURE FLEET",
+      "infra_key": "DATACENTER",
+      "total_threat_ips": 21,
+      "category_counts": {
+        "anonymizers": 5,
+        "attacks": 1
+      },
+      "category_percentages": {
+        "anonymizers": 23.8,
+        "attacks": 4.8
+      },
+      "primary_threat": "anonymizers"
+    }
+  ],
+  "infra_distribution": {
+    "RESIDENTIAL": {
+      "count": 5198,
+      "percentage": 68.3
+    },
+    "DATACENTER": {
+      "count": 1250,
+      "percentage": 16.4
+    },
+    "ANYCAST_CDN": {
+      "count": 1163,
+      "percentage": 15.3
+    }
+  }
+}
