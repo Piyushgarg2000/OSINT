@@ -1,8 +1,9 @@
+import React, { useState, useCallback } from "react";
 import { ComposableMap, Geographies, Geography, Sphere, Graticule } from "react-simple-maps";
 import { Tooltip } from "react-tooltip";
 import 'react-tooltip/dist/react-tooltip.css';
 
-const geoUrl = "/countries-110m.json";
+const geoUrl = "https://unpkg.com/world-atlas@2.0.2/countries-50m.json";
 
 // Threat Level Color Palette
 const COLORS = {
@@ -14,6 +15,30 @@ const COLORS = {
 };
 
 const MapChart = ({ data, onCountrySelect }) => {
+  const [rotation, setRotation] = useState([-10, -30, 0]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState([0, 0]);
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setDragStart([e.clientX, e.clientY]);
+  };
+
+  const handleMouseMove = useCallback(
+    (e) => {
+      if (isDragging) {
+        const dx = e.clientX - dragStart[0];
+        const dy = e.clientY - dragStart[1];
+        setRotation((r) => [r[0] + dx * 0.5, r[1] - dy * 0.5, r[2]]);
+        setDragStart([e.clientX, e.clientY]);
+      }
+    },
+    [isDragging, dragStart]
+  );
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
   
   const getColor = (countryName) => {
     if (!data || data.length === 0) return COLORS.empty;
@@ -28,7 +53,13 @@ const MapChart = ({ data, onCountrySelect }) => {
   };
 
   return (
-    <div style={{ width: "100%", position: "relative", backgroundColor: "#0F172A", borderRadius: "8px", overflow: "hidden" }}>
+    <div 
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      style={{ width: "100%", position: "relative", backgroundColor: "#0F172A", borderRadius: "8px", overflow: "hidden", cursor: isDragging ? "grabbing" : "grab" }}
+    >
       
       {/* FLOATING LEGEND */}
       <div style={{
@@ -64,36 +95,36 @@ const MapChart = ({ data, onCountrySelect }) => {
         </div>
       </div>
 
-      <ComposableMap projectionConfig={{ scale: 145 }} style={{ width: "100%", height: "auto" }}>
-        <Sphere stroke="#334155" strokeWidth={0.5} />
-        <Graticule stroke="#1E293B" strokeWidth={0.5} />
-        <Geographies geography={geoUrl}>
-          {({ geographies }) =>
-            geographies.map((geo) => {
-              const countryName = geo.properties.name;
-              const countryData = data && data.length > 0 ? data.find(d => d.country === countryName) : null;
-              const ipCount = countryData ? countryData.indicator_count.toLocaleString() : "0";
+      <ComposableMap projection="geoOrthographic" projectionConfig={{ scale: 220, rotate: rotation }} style={{ width: "100%", height: "auto" }}>
+          <Sphere stroke="#334155" strokeWidth={0.5} />
+          <Graticule stroke="#1E293B" strokeWidth={0.5} />
+          <Geographies geography={geoUrl}>
+            {({ geographies }) =>
+              geographies.map((geo) => {
+                const countryName = geo.properties.name;
+                const countryData = data && data.length > 0 ? data.find(d => d.country === countryName) : null;
+                const ipCount = countryData ? countryData.indicator_count.toLocaleString() : "0";
 
-              return (
-                <Geography
-                  key={geo.rsmKey}
-                  geography={geo}
-                  fill={getColor(countryName)}
-                  stroke="#0F172A"
-                  strokeWidth={0.5}
-                  data-tooltip-id="map-tooltip"
-                  data-tooltip-content={`${countryName} • ${ipCount} `}
-                  onClick={() => onCountrySelect(countryName)}
-                  style={{
-                    default: { outline: "none", transition: "fill 0.2s" },
-                    hover: { fill: "#38BDF8", outline: "none", cursor: "pointer", strokeWidth: 1 },
-                    pressed: { outline: "none" },
-                  }}
-                />
-              );
-            })
-          }
-        </Geographies>
+                return (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    fill={getColor(countryName)}
+                    stroke="#0F172A"
+                    strokeWidth={0.5}
+                    data-tooltip-id="map-tooltip"
+                    data-tooltip-content={`${countryName} • ${ipCount} `}
+                    onClick={() => onCountrySelect(countryName)}
+                    style={{
+                      default: { outline: "none", transition: "fill 0.2s" },
+                      hover: { fill: "#38BDF8", outline: "none", strokeWidth: 1 },
+                      pressed: { outline: "none" },
+                    }}
+                  />
+                );
+              })
+            }
+          </Geographies>
       </ComposableMap>
       <Tooltip id="map-tooltip" style={{ backgroundColor: "#1E293B", color: "#F8FAFC", borderRadius: "6px", padding: "8px 12px", fontSize: "14px", fontWeight: "600", zIndex: 1000, border: "1px solid #334155" }} />
     </div>

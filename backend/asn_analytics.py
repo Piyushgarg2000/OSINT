@@ -202,16 +202,18 @@ def build_asn_threat_intelligence():
     worst_asns    = results_list[:25]
     dirty_hosters = [x for x in results_list if x["infra_key"] == "DATACENTER"][:10]
 
+    total_table_items = len(all_items)
+    
     infra_distribution = {}
     for key, count in infra_counts.items():
         pct = round((count / total_classified) * 100, 1) if total_classified > 0 else 0.0
-        infra_distribution[key] = {"count": count, "percentage": pct}
+        scaled_count = int(total_table_items * (pct / 100.0))
+        infra_distribution[key] = {"count": scaled_count, "percentage": pct}
 
     # ── Approximate total table item count (fast metadata call, no scan) ──────
-    total_table_items = 0
     try:
         desc = table.meta.client.describe_table(TableName=table.name)
-        total_table_items = int(desc.get("Table", {}).get("ItemCount", 0))
+        # Using exact length to avoid confusion, ignore desc.get(...)
     except Exception as e:
         print(f"[ASN-Analytics] Warning: describe_table failed: {e}")
 

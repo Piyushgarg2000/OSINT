@@ -3,6 +3,7 @@ import axios from 'axios';
 import MapChart from './MapChart';
 import VpnAudit from './VpnAudit';
 import ASNIntelligence from './ASNIntelligence';
+import ThreatIntelligence from './ThreatIntelligence';
 
 /* ─── Theme (Mapped to CSS Variables) ────────────────────────────────────────── */
 const T = {
@@ -18,6 +19,7 @@ const T = {
   danger:    'var(--danger)',
   warning:   'var(--warning)',
   purple:    'var(--purple)',
+  orange:    'var(--orange, #F97316)',
   sidebar:   'var(--sidebar)',
   topbar:    'var(--topbar)',
 };
@@ -40,6 +42,13 @@ const NAV = [
     label: 'IP Intelligence',
     sub:   'Search & Profile',
     color: T.cyan,
+  },
+  {
+    id:    'threat_intel_system',
+    icon:  '🎯',
+    label: 'Threat Intelligence',
+    sub:   'Predictive Risk Engine',
+    color: T.orange,
   },
   {
     id:    'forensic_audit',
@@ -70,7 +79,8 @@ const NAV = [
 function SectionBanner({ icon, title, subtitle, badge, action, color }) {
   return (
     <div style={{
-      background: `linear-gradient(135deg, ${T.card} 0%, ${color}11 60%, ${T.card} 100%)`,
+      backgroundColor: T.bg,
+      backgroundImage: `linear-gradient(135deg, transparent 0%, ${color}11 60%, transparent 100%)`,
       borderBottom: `1px solid ${color}33`,
       padding: '26px 32px 22px',
       display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
@@ -265,12 +275,13 @@ function DashboardSection({ dbConnected, lastUpdated, asnStats, recentScans, onN
   const stats = asnStats ? [
     { icon: '🗄️', label: 'DynamoDB Records',   value: asnStats.total_table_items > 0 ? asnStats.total_table_items.toLocaleString() : '50,000+', sub: 'Total cached IPs', color: T.cyan,    nav: null },
     { icon: '🛡️', label: 'Total Threat IPs', value: (asnStats.global_total_threats ?? 0).toLocaleString(), sub: 'With behavioral flags', color: T.danger,  nav: 'asn_intel' },
-    { icon: '🌐', label: 'Analyzed ASNs (BGP)',  value: (asnStats.total_analyzed_ips ?? 0).toLocaleString(),   sub: 'IPs with valid routing', color: T.purple,  nav: 'asn_intel' },
+    { icon: '🌐', label: 'Analyzed ASNs (BGP)',  value: (asnStats.total_asns ?? 0).toLocaleString(),   sub: 'Unique Autonomous Systems', color: T.purple,  nav: 'asn_intel' },
     { icon: '⚡', label: 'IPs Scanned',          value: (asnStats.sample_size ?? 0).toLocaleString(), sub: 'In parallel 8-seg scan', color: T.accent, nav: null },
   ] : [];
 
   const quickLinks = [
     { icon: '🔍', label: 'Scan an IP Address',       sub: 'Profile geography, flags, BGP, telemetry', nav: 'ip_intel',       color: T.cyan },
+    { icon: '🎯', label: 'Predictive Threat Intel',   sub: 'Subnet clusters, 8-feature risk, actions', nav: 'threat_intel_system', color: T.orange },
     { icon: '🔬', label: 'Forensic Audit',            sub: 'VPN detection, consensus, traceroute',     nav: 'forensic_audit', color: T.purple },
     { icon: '🛡️', label: 'ASN Threat Analytics',     sub: 'Prefix clustering, findings, heatmaps',    nav: 'asn_intel',      color: T.danger },
     { icon: '🗺️', label: 'Global Threat Map',        sub: 'Multi-provider geo coverage by country',   nav: 'threat_map',     color: T.success },
@@ -350,6 +361,43 @@ function DashboardSection({ dbConnected, lastUpdated, asnStats, recentScans, onN
               All analytics derive from observed OSINT data — empirical proportions, not predictive probabilities.
             </div>
           </div>
+
+          {/* Infrastructure Distribution */}
+          {asnStats?.infra_distribution && (
+            <div style={{ marginTop: 20, backgroundColor: T.card, borderRadius: 8, padding: '20px', border: `1px solid ${T.border}` }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 16 }}>
+                <span style={{ marginRight: 8 }}>📡</span> Infrastructure Distribution
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
+                {Object.entries(asnStats.infra_distribution).map(([key, data]) => {
+                  const colors = {
+                    RESIDENTIAL: T.cyan,
+                    DATACENTER: T.purple,
+                    ANYCAST_CDN: T.accent
+                  };
+                  const c = colors[key] || T.textMuted;
+                  return (
+                    <div key={key} style={{ backgroundColor: T.cardSub, borderRadius: 6, padding: '12px 16px', borderLeft: `3px solid ${c}` }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
+                        <div style={{ fontWeight: 700, color: T.textMain, fontSize: 13, textTransform: 'capitalize' }}>
+                          {key.replace('_', ' ')}
+                        </div>
+                        <div style={{ color: c, fontWeight: 800, fontSize: 16 }}>
+                          {data.percentage}%
+                        </div>
+                      </div>
+                      <div style={{ width: '100%', height: 4, backgroundColor: T.bg, borderRadius: 2, overflow: 'hidden', marginBottom: 6 }}>
+                        <div style={{ width: `${data.percentage}%`, height: '100%', backgroundColor: c, borderRadius: 2 }} />
+                      </div>
+                      <div style={{ fontSize: 11, color: T.textMuted, textAlign: 'right' }}>
+                        {data.count.toLocaleString()} IPs
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Recent Scans */}
@@ -515,9 +563,6 @@ function MLThreatCard({ ip }) {
                     backgroundColor: riskBg, color: riskColor, border: `1px solid ${riskColor}44`,
                     display: 'inline-block',
                   }}>{risk}</div>
-                  <div style={{ fontSize: 10, color: T.textMuted, marginTop: 5 }}>
-                    Confidence: <strong style={{ color: T.textMain }}>{mlData.confidence}</strong>
-                  </div>
                 </div>
 
                 {/* Top factors */}
@@ -577,32 +622,6 @@ function MLThreatCard({ ip }) {
                   </div>
                 </div>
               </div>
-
-              {/* Category signals */}
-              {mlData.category_signals.length > 0 && (
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: T.textMuted, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>
-                    Predicted Category Signals (based on ASN/country patterns)
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
-                    {mlData.category_signals.map(s => {
-                      const CAT_COLORS = { attacks: '#EF4444', abuse: '#F97316', anonymizers: '#06B6D4', malware: '#8B5CF6', spam: '#F59E0B', reputation: '#EC4899', unroutable: '#64748B', organizations: '#10B981' };
-                      const c = CAT_COLORS[s.category] || T.textMuted;
-                      return (
-                        <div key={s.category} style={{ backgroundColor: T.cardSub, borderRadius: 6, padding: '8px 12px', border: `1px solid ${c}33` }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 5, textTransform: 'capitalize', fontWeight: 700 }}>
-                            <span style={{ color: c }}>{s.category}</span>
-                            <span style={{ color: T.textMuted }}>{s.signal_pct}%</span>
-                          </div>
-                          <div style={{ width: '100%', height: 4, backgroundColor: T.bg, borderRadius: 2, overflow: 'hidden' }}>
-                            <div style={{ width: `${Math.min(s.signal_pct, 100)}%`, height: '100%', backgroundColor: c, borderRadius: 2 }} />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
 
               {/* Model metrics row */}
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
@@ -1157,6 +1176,16 @@ export default function App() {
               onNavigate={navigateTo}
               onSearchIP={searchAndGoToIP}
             />
+          </div>
+
+          {/* ── THREAT INTELLIGENCE & PREDICTIVE RISK ──────────────── */}
+          <div style={{ display: activeSection === 'threat_intel_system' ? 'block' : 'none' }}>
+            <SectionBanner
+              icon="🎯" title="IP Threat Intelligence & Predictive Risk" color={T.orange}
+              subtitle="Actionable intelligence engine: /24 subnet clustering, ASN concentration, 7-day velocity, and 8-feature calibrated predictive future risk."
+              badge="NERDS Model · Subnet Clusters · Actionable Playbook"
+            />
+            <ThreatIntelligence defaultIP={searchQuery || '198.51.100.25'} />
           </div>
 
           {/* ── IP INTELLIGENCE ──────────────────────────────────── */}

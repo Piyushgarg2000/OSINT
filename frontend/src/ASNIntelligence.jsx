@@ -242,9 +242,460 @@ function FindingCard({ finding, defaultExpanded }) {
   );
 }
 
-function PrefixTable({ prefixes, total }) {
+
+// ── Intelligence & FireHOL Guide Modal ───────────────────────────────────────
+function IntelGuideModal({ isOpen, onClose }) {
+  const [activeTab, setActiveTab] = useState('firehol');
+  if (!isOpen) return null;
+
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(2, 6, 23, 0.85)', backdropFilter: 'blur(8px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 10001, padding: '16px'
+    }} onClick={onClose}>
+      <div style={{
+        backgroundColor: '#0F172A', border: `1px solid ${theme.cyan}`, borderRadius: '12px',
+        maxWidth: '850px', width: '100%', maxHeight: '88vh', overflowY: 'auto',
+        padding: '24px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.9)'
+      }} onClick={e => e.stopPropagation()}>
+        
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${theme.border}`, paddingBottom: '14px', marginBottom: '16px' }}>
+          <div>
+            <div style={{ fontSize: '18px', fontWeight: '800', color: theme.textMain, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              ℹ️ Threat Intelligence Knowledge & Tagging Guide
+            </div>
+            <div style={{ fontSize: '12px', color: theme.textMuted, marginTop: '4px' }}>
+              How raw IP feeds, behavioral categories, tactical roles, and containment scores are calculated.
+            </div>
+          </div>
+          <button onClick={onClose} style={{
+            background: 'transparent', border: `1px solid ${theme.border}`, color: theme.textMuted,
+            borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontWeight: '700'
+          }}>✕ Close</button>
+        </div>
+
+        {/* Tab navigation */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '18px', flexWrap: 'wrap' }}>
+          {[
+            { id: 'firehol', label: '🛡️ FireHOL Attack Tags' },
+            { id: 'tactical', label: '⚔️ Tactical Roles' },
+            { id: 'contagion', label: '🧪 Contagion Index' },
+            { id: 'blast', label: '💥 Blast Radius & Micro-CIDR' },
+            { id: 'campaigns', label: '🔗 Coordinated Campaigns' }
+          ].map(t => (
+            <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
+              padding: '6px 12px', fontSize: '11px', fontWeight: '700', borderRadius: '5px',
+              backgroundColor: activeTab === t.id ? theme.cyan : theme.cardSub,
+              color: activeTab === t.id ? '#020617' : theme.textMuted,
+              border: `1px solid ${activeTab === t.id ? theme.cyan : theme.border}`,
+              cursor: 'pointer'
+            }}>{t.label}</button>
+          ))}
+        </div>
+
+        {/* Tab 1: FireHOL Tags */}
+        {activeTab === 'firehol' && (
+          <div>
+            <div style={{ fontSize: '13px', color: theme.accent, fontWeight: '700', marginBottom: '10px' }}>
+              Official Behavioral Tags (FireHOL Threat Intelligence Feed Mappings):
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '10px' }}>
+              {[
+                { tag: 'attacks', color: '#EF4444', icon: '⚔️', title: 'Brute-Force & Active Exploitation', desc: 'IP was observed actively attacking servers via Port 22 (SSH), Port 3389 (RDP), or web application exploit attempts.' },
+                { tag: 'anonymizers', color: '#06B6D4', icon: '🎭', title: 'Tor, Commercial VPNs & Proxies', desc: 'IP belongs to known Tor exit relays, commercial VPN pools, or open HTTP/SOCKS proxies used by adversaries to mask their origin.' },
+                { tag: 'malware', color: '#8B5CF6', icon: '☣️', title: 'C2 Staging & Botnet Trojans', desc: 'Confirmed Command-and-Control (C2) botmaster server or active distributor of ransomware, trojans, and malicious binaries.' },
+                { tag: 'abuse', color: '#F97316', icon: '🚨', title: 'Honeypot & Abuse Reports', desc: 'Triggered distributed honeypots (honeytokens, fake services) or received high-frequency verified community abuse reports.' },
+                { tag: 'spam', color: '#F59E0B', icon: '🔍', title: 'Aggressive Scrapers & Recon Crawlers', desc: 'Automated crawlers harvesting data, aggressive vulnerability probes, or spam relays attempting email relaying.' },
+                { tag: 'reputation', color: '#EC4899', icon: '📋', title: 'OTX & Emerging Threats Lists', desc: 'Blacklisted by AlienVault OTX, Emerging Threats, or Spamhaus with sustained historical malicious activity.' },
+                { tag: 'unroutable', color: '#64748B', icon: '🚫', title: 'Bogon / Spoofed IP Space', desc: 'IP packets originating from reserved, unallocated, or bogon IP blocks (often indicates IP spoofing / reflection attacks).' },
+                { tag: 'organizations', color: '#10B981', icon: '🏢', title: 'Bulletproof Hosting Networks', desc: 'Hosted on infrastructure known to ignore DMCA and law enforcement take-down notices.' },
+              ].map(f => (
+                <div key={f.tag} style={{ backgroundColor: '#1E293B', padding: '12px', borderRadius: '8px', border: `1px solid ${f.color}44` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '14px' }}>{f.icon}</span>
+                    <span style={{ fontFamily: 'monospace', fontWeight: '800', color: f.color, fontSize: '12px', textTransform: 'uppercase' }}>{f.tag}</span>
+                    <span style={{ fontSize: '11px', color: theme.textMain, fontWeight: '600' }}>· {f.title}</span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: theme.textMuted, lineHeight: '1.4' }}>{f.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 2: Tactical Roles */}
+        {activeTab === 'tactical' && (
+          <div style={{ fontSize: '12px', color: theme.textMuted, lineHeight: '1.6' }}>
+            <div style={{ color: theme.textMain, fontWeight: '700', fontSize: '14px', marginBottom: '8px' }}>
+              How Prefix Tactical Roles Are Classified:
+            </div>
+            <p>
+              Instead of looking at isolated IPs, tactical clustering analyzes the collective attack distribution across the entire BGP prefix block using Shannon Entropy and category ratios:
+            </p>
+            <div style={{ backgroundColor: '#1E293B', padding: '14px', borderRadius: '8px', margin: '12px 0', border: `1px solid ${theme.border}` }}>
+              <div>⚔️ <strong style={{ color: theme.danger }}>Active Exploitation Hub:</strong> ≥50% combined attacks + abuse. High volume password brute-forcing.</div>
+              <div style={{ marginTop: '8px' }}>🎭 <strong style={{ color: theme.purple }}>Anonymizer & Proxy Masking Fleet:</strong> ≥40% Tor/VPN/proxy traffic. Used for identity evasion.</div>
+              <div style={{ marginTop: '8px' }}>☣️ <strong style={{ color: '#ec4899' }}>Malware C2 Staging Ground:</strong> ≥35% malware tags. Central botmaster command node.</div>
+              <div style={{ marginTop: '8px' }}>🔍 <strong style={{ color: theme.cyan }}>Reconnaissance & Scraping Fleet:</strong> ≥40% spam/crawling. Pre-attack target scanning.</div>
+              <div style={{ marginTop: '8px' }}>⚡ <strong style={{ color: theme.warning }}>Multi-Vector Hybrid Hub:</strong> High Shannon Entropy (&gt;1.5). Diverse simultaneous attack vectors.</div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Contagion Index */}
+        {activeTab === 'contagion' && (
+          <div style={{ fontSize: '12px', color: theme.textMuted, lineHeight: '1.6' }}>
+            <div style={{ color: theme.textMain, fontWeight: '700', fontSize: '14px', marginBottom: '8px' }}>
+              Subnet Contagion & Infiltration Index:
+            </div>
+            <p>
+              Measures whether an attack is an isolated single-device incident or a widespread lateral infection across customer subnets:
+            </p>
+            <div style={{ backgroundColor: '#1E293B', padding: '14px', borderRadius: '8px', margin: '12px 0', border: `1px solid ${theme.border}` }}>
+              <div>🟢 <strong style={{ color: theme.cyan }}>Isolated Host / Tenant (Score &lt; 30%):</strong> All malicious IPs originate from the exact same /24 subnet (e.g. 3.144.86.0/24). Root cause is likely a single compromised VPS or stolen credentials.</div>
+              <div style={{ marginTop: '10px' }}>🔴 <strong style={{ color: theme.danger }}>Widespread Subnet Contagion (Score ≥ 60%):</strong> Malicious IPs are distributed across 5, 10, or 20 distinct /24 subnets within the prefix. Indicates an entire cloud tenant VPC compromise or routing lease compromise.</div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 4: Blast Radius */}
+        {activeTab === 'blast' && (
+          <div style={{ fontSize: '12px', color: theme.textMuted, lineHeight: '1.6' }}>
+            <div style={{ color: theme.textMain, fontWeight: '700', fontSize: '14px', marginBottom: '8px' }}>
+              Blast Radius Calculator & Minimal Enclosing Micro-CIDR:
+            </div>
+            <p>
+              A common operational mistake is dropping a full /13 or /16 BGP CIDR at the border firewall, resulting in blackholing hundreds of thousands of legitimate innocent cloud tenants:
+            </p>
+            <div style={{ backgroundColor: '#1E293B', padding: '14px', borderRadius: '8px', margin: '12px 0', border: `1px solid ${theme.border}` }}>
+              <div style={{ color: theme.danger, fontWeight: '700' }}>⚠️ Macro-CIDR Collateral Risk:</div>
+              <div>Prefix 3.144.0.0/13 contains 524,288 IPs. Dropping this prefix to block 4 threat IPs results in <strong>99.999% collateral damage</strong>.</div>
+              <div style={{ color: theme.success, fontWeight: '700', marginTop: '12px' }}>✅ Surgical Micro-CIDR Quarantine:</div>
+              <div>Our algorithm computes the smallest binary enclosing subnet (e.g. <strong>3.144.86.0/27</strong>, 32 IPs). Quarantining this micro-pocket blocks 100% of the active attackers while affecting fewer than 28 benign hosts.</div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 5: Coordinated Campaigns */}
+        {activeTab === 'campaigns' && (
+          <div style={{ fontSize: '12px', color: theme.textMuted, lineHeight: '1.6' }}>
+            <div style={{ color: theme.textMain, fontWeight: '700', fontSize: '14px', marginBottom: '8px' }}>
+              Coordinated Campaign Fingerprinting (Adaptive Pareto Selection):
+            </div>
+            <p>
+              Smart attackers distribute operations across independent cloud regions to evade single-block rate limits.
+              We detect coordinated collusion by:
+            </p>
+            <ol style={{ paddingLeft: '20px', marginTop: '8px' }}>
+              <li><strong>Noise Filter:</strong> Excluding prefixes with &lt; 2 threat IPs to eliminate random noise.</li>
+              <li><strong>Pareto 80/20 Selection:</strong> Selecting the top active prefixes accounting for 80% of ASN threats (Min 2, Max 15).</li>
+              <li><strong>Weighted Jaccard Profile Matching:</strong> Calculating mathematical similarity of attack category vectors:</li>
+            </ol>
+            <div style={{ fontFamily: 'monospace', backgroundColor: '#0B1223', padding: '10px', borderRadius: '6px', color: theme.cyan, margin: '8px 0' }}>
+              J(A, B) = Σ min(Vector_A, Vector_B) / Σ max(Vector_A, Vector_B)
+            </div>
+            <p>Pairs exceeding 60% similarity with concurrent activity are unified under a single coordinated campaign ID.</p>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+// ── Deep Threat Pivot Modal ──────────────────────────────────────────────────
+function ThreatPivotModal({ ip, data, loading, error, onClose }) {
+  if (!ip) return null;
+
+  const copyRule = (ruleText) => {
+    navigator.clipboard.writeText(ruleText);
+    alert(`Copied to clipboard:\n${ruleText}`);
+  };
+
+  const pred = data?.predictive_risk || {};
+  const recs = data?.recommendations || [];
+  const subnet = data?.subnet_neighborhood || {};
+
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(2, 6, 23, 0.88)', backdropFilter: 'blur(8px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 10002, padding: '16px'
+    }} onClick={onClose}>
+      <div style={{
+        backgroundColor: '#0F172A', border: `1px solid ${theme.accent}`, borderRadius: '14px',
+        maxWidth: '820px', width: '100%', maxHeight: '90vh', overflowY: 'auto',
+        padding: '24px', boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.95)'
+      }} onClick={e => e.stopPropagation()}>
+        
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: `1px solid ${theme.border}`, paddingBottom: '16px', marginBottom: '18px' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '20px' }}>🎯</span>
+              <span style={{ fontFamily: 'monospace', fontSize: '20px', fontWeight: '900', color: theme.cyan }}>{ip}</span>
+              <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '4px', backgroundColor: '#082f49', color: theme.accent, border: `1px solid ${theme.accent}66`, fontWeight: '700' }}>
+                DEEP THREAT PIVOT
+              </span>
+            </div>
+            <div style={{ fontSize: '12px', color: theme.textMuted, marginTop: '4px' }}>
+              Direct microscopic host-level intelligence & automated firewall defense playbook.
+            </div>
+          </div>
+          <button onClick={onClose} style={{
+            background: 'transparent', border: `1px solid ${theme.border}`, color: theme.textMuted,
+            borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontWeight: '700'
+          }}>✕ Close</button>
+        </div>
+
+        {/* Loading */}
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+            <div style={{ fontSize: '32px', marginBottom: '12px' }}>⟳</div>
+            <div style={{ color: theme.accent, fontWeight: '700', fontSize: '14px' }}>Querying Host Telemetry & ML Scoring Engine…</div>
+          </div>
+        )}
+
+        {/* Error */}
+        {!loading && error && (
+          <div style={{ padding: '14px', backgroundColor: '#450a0a', border: `1px solid ${theme.danger}`, borderRadius: '8px', color: theme.danger }}>
+            ⚠️ {error}
+          </div>
+        )}
+
+        {/* Content */}
+        {!loading && data && (
+          <div>
+            {/* Top Score Banner */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '18px' }}>
+              <div style={{ backgroundColor: '#1E293B', padding: '14px', borderRadius: '8px', border: `1px solid ${theme.border}` }}>
+                <div style={{ fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase' }}>Predictive Risk Score</div>
+                <div style={{ fontSize: '24px', fontWeight: '900', fontFamily: 'monospace', color: pred.risk_score >= 60 ? theme.danger : pred.risk_score >= 30 ? theme.warning : theme.success }}>
+                  {pred.risk_score?.toFixed(1) || 0}%
+                </div>
+                <div style={{ fontSize: '11px', color: theme.textMuted }}>Level: <strong>{pred.risk_level || 'N/A'}</strong></div>
+              </div>
+              <div style={{ backgroundColor: '#1E293B', padding: '14px', borderRadius: '8px', border: `1px solid ${theme.border}` }}>
+                <div style={{ fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase' }}>Neighborhood Context</div>
+                <div style={{ fontSize: '15px', fontWeight: '700', color: theme.textMain, marginTop: '4px' }}>
+                  {subnet.total_threats_in_subnet > 1 ? `🚨 ${subnet.total_threats_in_subnet} Subnet Threats` : '🟢 Isolated Needle in Subnet'}
+                </div>
+                <div style={{ fontSize: '11px', color: theme.textMuted }}>{subnet.subnet_24 || 'N/A'}</div>
+              </div>
+              <div style={{ backgroundColor: '#1E293B', padding: '14px', borderRadius: '8px', border: `1px solid ${theme.border}` }}>
+                <div style={{ fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase' }}>Attacker Role Verdict</div>
+                <div style={{ fontSize: '15px', fontWeight: '700', color: theme.accent, marginTop: '4px' }}>
+                  {pred.risk_score >= 60 ? '👑 Primary Threat Originator' : '♟️ Transient Node / Decoy'}
+                </div>
+                <div style={{ fontSize: '11px', color: theme.textMuted }}>Autonomous Host Hierarchy</div>
+              </div>
+            </div>
+
+            {/* Behavioral Flags */}
+            <div style={{ marginBottom: '18px', backgroundColor: '#1E293B', padding: '14px', borderRadius: '8px' }}>
+              <div style={{ fontSize: '11px', color: theme.textMuted, textTransform: 'uppercase', marginBottom: '8px' }}>
+                Active Behavioral Threat Tags:
+              </div>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                {(data.behavioral_flags || []).length > 0 ? (
+                  data.behavioral_flags.map(flag => (
+                    <span key={flag} style={{
+                      backgroundColor: '#450a0a', color: theme.danger, border: `1px solid ${theme.danger}66`,
+                      padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '700', fontFamily: 'monospace'
+                    }}>
+                      ⚠️ {flag}
+                    </span>
+                  ))
+                ) : (
+                  <span style={{ color: theme.textMuted, fontSize: '12px' }}>No active behavioral tags recorded.</span>
+                )}
+              </div>
+            </div>
+
+            {/* Actionable Playbook with 1-click Copy */}
+            <div style={{ marginBottom: '18px' }}>
+              <div style={{ fontSize: '12px', fontWeight: '800', color: theme.textMain, textTransform: 'uppercase', marginBottom: '8px' }}>
+                🛡️ Direct SOC Enforcement Actions:
+              </div>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => copyRule(`iptables -A INPUT -s ${ip} -j DROP`)}
+                  style={{
+                    backgroundColor: '#1E293B', border: `1px solid ${theme.danger}88`, color: theme.danger,
+                    padding: '8px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: '6px'
+                  }}
+                >
+                  📋 Copy iptables Drop Rule
+                </button>
+                <button
+                  onClick={() => copyRule(`aws ec2 create-network-acl-entry --network-acl-id acl-xxxx --ingress --rule-number 100 --protocol -1 --cidr-block ${ip}/32 --rule-action deny`)}
+                  style={{
+                    backgroundColor: '#1E293B', border: `1px solid ${theme.cyan}88`, color: theme.cyan,
+                    padding: '8px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: '6px'
+                  }}
+                >
+                  ☁️ Copy AWS ACL Block
+                </button>
+                <button
+                  onClick={() => copyRule(`Target: ${ip}\nASN: ${data.asn || 'N/A'}\nCategories: ${(data.behavioral_flags || []).join(', ')}\nTimestamp: ${new Date().toISOString()}\nReport: Abuse detected via OSINT dashboard.`)}
+                  style={{
+                    backgroundColor: '#1E293B', border: `1px solid ${theme.accent}88`, color: theme.accent,
+                    padding: '8px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: '6px'
+                  }}
+                >
+                  ✉️ Copy NOC Abuse Report
+                </button>
+              </div>
+            </div>
+
+            {/* Playbook recommendations */}
+            {recs.length > 0 && (
+              <div style={{ backgroundColor: '#0B1223', padding: '14px', borderRadius: '8px', border: `1px solid ${theme.border}` }}>
+                <div style={{ fontSize: '11px', color: theme.textMuted, textTransform: 'uppercase', marginBottom: '8px' }}>
+                  Analyst Investigation Playbook:
+                </div>
+                {recs.map((r, i) => (
+                  <div key={i} style={{ fontSize: '11px', color: theme.textMuted, marginBottom: '6px', display: 'flex', gap: '6px' }}>
+                    <span style={{ color: theme.cyan }}>▸</span>
+                    <span>{r.action || r}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+// ── Coordinated Campaigns View ──────────────────────────────────────────────
+function CoordinatedCampaignsView({ campaigns, onOpenGuide }) {
+  if (!campaigns || campaigns.length === 0) {
+    return (
+      <div style={{ padding: '36px', textAlign: 'center', backgroundColor: theme.cardSub, borderRadius: '8px', border: `1px solid ${theme.border}` }}>
+        <div style={{ fontSize: '28px', marginBottom: '10px' }}>🛡️</div>
+        <div style={{ color: theme.textMain, fontWeight: '700', fontSize: '15px', marginBottom: '6px' }}>
+          No Coordinated Campaigns Detected
+        </div>
+        <div style={{ fontSize: '12px', color: theme.textMuted, maxWidth: '550px', margin: '0 auto' }}>
+          Threat IPs within this ASN are currently exhibiting localized, independent behavior. No multi-prefix synchronized attack signatures met the 60% Pareto correlation threshold.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+        <div>
+          <div style={{ fontSize: '15px', fontWeight: '800', color: theme.textMain, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            🔗 Coordinated Threat Campaign Fingerprints (Cross-Prefix Collusion)
+          </div>
+          <div style={{ fontSize: '12px', color: theme.textMuted, marginTop: '2px' }}>
+            Identified multi-region BGP prefixes exhibiting synchronized attack vectors across independent routing blocks.
+          </div>
+        </div>
+        <button
+          onClick={onOpenGuide}
+          style={{
+            padding: '5px 12px', fontSize: '11px', fontWeight: '700', borderRadius: '5px',
+            backgroundColor: `${theme.cyan}20`, color: theme.cyan, border: `1px solid ${theme.cyan}66`,
+            cursor: 'pointer'
+          }}
+        >
+          ℹ️ Campaign Methodology Guide
+        </button>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        {campaigns.map(c => {
+          const score = c.confidence_score || c.similarity_pct || 0;
+          const verdictBadge = c.verdict_badge || (score >= 70 ? '🔴 High-Confidence Synchronized Cluster' : (score >= 50 ? '🟠 Regional Cloud Threat Pool' : '🟡 Shared Tooling / Common Script'));
+          let opColor = theme.warning;
+          if (c.verdict_color === 'red' || score >= 70) opColor = theme.danger;
+          else if (c.verdict_color === 'orange' || score >= 50) opColor = theme.orange;
+          else opColor = theme.warning;
+
+          return (
+            <div key={c.campaign_id} style={{
+              backgroundColor: '#0F172A', border: `1px solid ${theme.purple}66`, borderRadius: '10px',
+              padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
+            }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', borderBottom: `1px solid ${theme.border}55`, paddingBottom: '10px', marginBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '16px' }}>🔥</span>
+                <span style={{ fontFamily: 'monospace', fontWeight: '900', color: theme.accent, fontSize: '14px' }}>{c.campaign_id}</span>
+                <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '4px', backgroundColor: '#3b0764', color: theme.purple, fontWeight: '700', border: `1px solid ${theme.purple}55` }}>
+                  SYNCHRONIZED {c.dominant_vector?.toUpperCase()}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '11px', color: theme.textMuted }}>Multi-Factor Correlation:</span>
+                <span style={{ fontFamily: 'monospace', fontWeight: '800', fontSize: '14px', color: opColor }}>
+                  {score}%
+                </span>
+              </div>
+            </div>
+
+            {/* Verdict & Multi-Factor Badges */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '11px', fontWeight: '800', padding: '3px 10px', borderRadius: '6px', backgroundColor: `${opColor}18`, color: opColor, border: `1px solid ${opColor}44` }}>
+                {verdictBadge}
+              </span>
+              {c.multi_factor_breakdown?.geographic?.label && (
+                <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '6px', backgroundColor: '#1e293b', color: theme.cyan, border: `1px solid ${theme.border}` }}>
+                  📍 {c.multi_factor_breakdown.geographic.label}
+                </span>
+              )}
+              {c.multi_factor_breakdown?.temporal?.label && (
+                <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '6px', backgroundColor: '#1e293b', color: '#38bdf8', border: `1px solid ${theme.border}` }}>
+                  ⏱️ {c.multi_factor_breakdown.temporal.label}
+                </span>
+              )}
+              {c.multi_factor_breakdown?.telemetry?.label && (
+                <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '6px', backgroundColor: '#1e293b', color: theme.textMuted, border: `1px solid ${theme.border}` }}>
+                  ⚡ {c.multi_factor_breakdown.telemetry.label}
+                </span>
+              )}
+            </div>
+
+            <div style={{ fontSize: '12px', color: theme.textMuted, marginBottom: '14px' }}>
+              <strong>Evidence:</strong> {c.evidence}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px' }}>
+              {c.prefixes.map(p => (
+                <div key={p.prefix} style={{ backgroundColor: '#1E293B', padding: '10px 14px', borderRadius: '6px', border: `1px solid ${theme.border}` }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <span style={{ fontFamily: 'monospace', fontWeight: '700', color: theme.cyan, fontSize: '13px' }}>{p.prefix}</span>
+                    <span style={{ color: theme.danger, fontWeight: '800', fontSize: '12px' }}>{p.threat_count} threats</span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: theme.textMuted }}>Role: <span style={{ color: theme.textMain }}>{p.role || 'Active Threat Node'}</span></div>
+                </div>
+              ))}
+            </div>
+          </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function PrefixTable({ prefixes, total, onPivotIp, onOpenGuide }) {
   const [sortCol, setSortCol] = useState('count');
   const [showAll, setShowAll] = useState(false);
+  const [expandedPrefix, setExpandedPrefix] = useState(null);
 
   const sorted = useMemo(() => {
     return [...prefixes].sort((a, b) => {
@@ -271,18 +722,43 @@ function PrefixTable({ prefixes, total }) {
 
   return (
     <div>
+      {/* Quick Guide Banner */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '10px 14px', marginBottom: '14px', borderRadius: '8px',
+        backgroundColor: '#0B132B', border: `1px solid ${theme.accent}44`,
+        flexWrap: 'wrap', gap: '10px'
+      }}>
+        <div style={{ fontSize: '12px', color: theme.textMain, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>💡</span>
+          <span>
+            Explore <strong>Tactical Roles</strong>, <strong>Subnet Contagion Index</strong>, and <strong>Surgical Micro-CIDR</strong> bounds for each prefix.
+          </span>
+        </div>
+        <button
+          onClick={onOpenGuide}
+          style={{
+            padding: '5px 12px', fontSize: '11px', fontWeight: '700', borderRadius: '5px',
+            backgroundColor: `${theme.cyan}22`, color: theme.cyan, border: `1px solid ${theme.cyan}66`,
+            cursor: 'pointer'
+          }}
+        >
+          ℹ️ Threat Intel & FireHOL Guide
+        </button>
+      </div>
+
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
           <thead>
             <tr>
-              <HeaderCell col="prefix" label="Network Prefix" />
+              <HeaderCell col="prefix" label="Network Prefix & Role" />
               <HeaderCell col="count" label="Threat IPs" align="right" />
-              <th style={{ padding: '8px 10px', fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase', borderBottom: `1px solid ${theme.border}` }}>Prefix Size</th>
+              <th style={{ padding: '8px 10px', fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase', borderBottom: `1px solid ${theme.border}` }}>Prefix Size & Micro-CIDR</th>
               <HeaderCell col="density" label="Obs. Density" align="right" />
-              <th style={{ padding: '8px 10px', fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase', borderBottom: `1px solid ${theme.border}` }}>Density Class</th>
-              <th style={{ padding: '8px 10px', fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase', borderBottom: `1px solid ${theme.border}` }}>Dominant Category</th>
-              <th style={{ padding: '8px 10px', fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase', borderBottom: `1px solid ${theme.border}` }}>Categories</th>
+              <th style={{ padding: '8px 10px', fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase', borderBottom: `1px solid ${theme.border}` }}>Contagion Index</th>
+              <th style={{ padding: '8px 10px', fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase', borderBottom: `1px solid ${theme.border}` }}>Dominant Vector</th>
               <th style={{ padding: '8px 10px', fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase', borderBottom: `1px solid ${theme.border}` }}>% of ASN</th>
+              <th style={{ padding: '8px 10px', fontSize: '10px', color: theme.accent, textTransform: 'uppercase', textAlign: 'center', borderBottom: `1px solid ${theme.border}` }}>Threat IPs</th>
             </tr>
           </thead>
           <tbody>
@@ -290,49 +766,191 @@ function PrefixTable({ prefixes, total }) {
               const dm = DENSITY_META[p.density_class] || DENSITY_META.UNKNOWN;
               const pct_of_asn = total > 0 ? ((p.threat_ip_count / total) * 100).toFixed(1) : '0';
               const isUnavailable = p.prefix === 'Prefix Unavailable';
+              const role = p.tactical_role;
+              const contagion = p.contagion_index;
+              const blast = p.blast_radius;
+
               return (
-                <tr key={p.prefix + idx} style={{ borderBottom: `1px solid ${theme.border}22`, backgroundColor: idx % 2 === 0 ? 'transparent' : `${theme.cardSub}55` }}>
-                  <td style={{ padding: '10px 10px', fontFamily: 'monospace', fontWeight: '600', color: isUnavailable ? theme.textMuted : theme.cyan, fontSize: '12px' }}>
-                    {p.prefix}
+                <React.Fragment key={p.prefix + idx}>
+                <tr style={{ borderBottom: `1px solid ${theme.border}22`, backgroundColor: idx % 2 === 0 ? 'transparent' : `${theme.cardSub}55` }}>
+                  <td style={{ padding: '10px 10px' }}>
+                    <div style={{ fontFamily: 'monospace', fontWeight: '700', color: isUnavailable ? theme.textMuted : theme.cyan, fontSize: '13px' }}>
+                      {p.prefix}
+                    </div>
+                    {role && role.role !== 'DORMANT_RESERVE' && (
+                      <div style={{
+                        fontSize: '10px', marginTop: '3px', fontWeight: '700',
+                        color: role.badge_color === 'red' ? '#F87171' : role.badge_color === 'purple' ? '#C084FC' : role.badge_color === 'cyan' ? '#38BDF8' : '#FBBF24',
+                        display: 'flex', alignItems: 'center', gap: '3px'
+                      }}>
+                        {role.icon} {role.title}
+                      </div>
+                    )}
                   </td>
                   <td style={{ padding: '10px 10px', textAlign: 'right', fontWeight: '800', color: theme.danger, fontFamily: 'monospace', fontSize: '13px' }}>
                     {p.threat_ip_count.toLocaleString()}
                   </td>
                   <td style={{ padding: '10px 10px', color: theme.textMuted, fontFamily: 'monospace', fontSize: '11px' }}>
-                    {isUnavailable ? '—' : p.prefix_size > 0 ? p.prefix_size.toLocaleString() : '—'}
+                    <div>{isUnavailable ? '—' : p.prefix_size > 0 ? p.prefix_size.toLocaleString() : '—'}</div>
+                    {blast && blast.micro_cidr !== 'N/A' && (
+                      <div style={{ fontSize: '9px', color: theme.cyan, marginTop: '2px', fontWeight: '600' }}>
+                        🎯 Micro: {blast.micro_cidr}
+                      </div>
+                    )}
                   </td>
                   <td style={{ padding: '10px 10px', textAlign: 'right', fontFamily: 'monospace', fontWeight: '700', color: dm.color, fontSize: '12px' }}>
                     {p.threat_density_pct != null ? `${p.threat_density_pct.toFixed(2)}%` : '—'}
                   </td>
                   <td style={{ padding: '10px 10px' }}>
-                    {p.density_class !== 'UNKNOWN' ? (
+                    {contagion ? (
                       <span style={{
                         fontSize: '10px', padding: '2px 7px', borderRadius: '4px', fontWeight: '700',
-                        backgroundColor: `${dm.color}20`, color: dm.color, border: `1px solid ${dm.color}44`,
-                      }}>{dm.label}</span>
+                        backgroundColor: contagion.color === 'red' ? '#450a0a' : contagion.color === 'amber' ? '#451a03' : '#042f2e',
+                        color: contagion.color === 'red' ? '#f87171' : contagion.color === 'amber' ? '#fbbf24' : '#2dd4bf',
+                        border: `1px solid ${contagion.color === 'red' ? '#f87171' : contagion.color === 'amber' ? '#fbbf24' : '#2dd4bf'}44`,
+                      }}>
+                        🧪 {contagion.score}% ({contagion.label})
+                      </span>
                     ) : <span style={{ color: theme.textMuted, fontSize: '11px' }}>—</span>}
                   </td>
                   <td style={{ padding: '10px 10px', textTransform: 'capitalize', fontWeight: '600', fontSize: '11px',
                     color: CATEGORY_COLORS[p.dominant_category] || theme.textMuted }}>
                     {p.dominant_category || '—'}
                   </td>
-                  <td style={{ padding: '10px 10px' }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-                      {Object.keys(p.category_counts || {}).slice(0, 3).map(cat => (
-                        <span key={cat} style={{
-                          fontSize: '9px', padding: '1px 5px', borderRadius: '3px',
-                          backgroundColor: `${CATEGORY_COLORS[cat] || '#64748B'}22`,
-                          color: CATEGORY_COLORS[cat] || '#64748B',
-                          border: `1px solid ${CATEGORY_COLORS[cat] || '#64748B'}44`,
-                          fontWeight: '700', textTransform: 'capitalize',
-                        }}>{cat}</span>
-                      ))}
-                    </div>
-                  </td>
                   <td style={{ padding: '10px 10px', color: theme.textMuted, fontFamily: 'monospace', fontSize: '11px' }}>
                     {pct_of_asn}%
                   </td>
+                  <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                    <button
+                      onClick={() => setExpandedPrefix(expandedPrefix === p.prefix ? null : p.prefix)}
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        borderRadius: '4px',
+                        backgroundColor: expandedPrefix === p.prefix ? theme.accent : `${theme.accent}18`,
+                        color: expandedPrefix === p.prefix ? '#020617' : theme.accent,
+                        border: `1px solid ${theme.accent}55`,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {expandedPrefix === p.prefix ? 'Hide Intel ▲' : 'Show IPs & Intel 🎯'}
+                    </button>
+                  </td>
                 </tr>
+
+                {/* Expanded Deep Analysis Row */}
+                {expandedPrefix === p.prefix && (
+                  <tr style={{ backgroundColor: `${theme.cardSub}95` }}>
+                    <td colSpan={8} style={{ padding: '16px 20px', borderBottom: `1px solid ${theme.border}44` }}>
+                      
+                      {/* 3-Card Grid for Deep Features */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+                        
+                        {/* Tactical Role */}
+                        <div style={{ backgroundColor: '#0F172A', padding: '12px 14px', borderRadius: '8px', border: `1px solid ${theme.border}` }}>
+                          <div style={{ fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase', marginBottom: '4px' }}>
+                            🎭 Tactical Role & Mission
+                          </div>
+                          <div style={{ fontSize: '13px', fontWeight: '800', color: theme.accent, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>{role?.icon || '⚪'}</span>
+                            <span>{role?.title || 'Unclassified'}</span>
+                          </div>
+                          <div style={{ fontSize: '11px', color: theme.textMuted, marginTop: '4px', lineHeight: '1.4' }}>
+                            {role?.description || 'No specialized behavior tagged.'}
+                          </div>
+                        </div>
+
+                        {/* Contagion Index */}
+                        <div style={{ backgroundColor: '#0F172A', padding: '12px 14px', borderRadius: '8px', border: `1px solid ${theme.border}` }}>
+                          <div style={{ fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase', marginBottom: '4px' }}>
+                            🧪 Subnet Contagion Index
+                          </div>
+                          <div style={{ fontSize: '13px', fontWeight: '800', color: contagion?.color === 'red' ? '#f87171' : contagion?.color === 'amber' ? '#fbbf24' : '#2dd4bf' }}>
+                            Score: {contagion?.score}% · {contagion?.unique_subnets} /24 Subnets
+                          </div>
+                          <div style={{ fontSize: '11px', color: theme.textMuted, marginTop: '4px', lineHeight: '1.4' }}>
+                            {contagion?.interpretation || 'Analysis unavailable.'}
+                          </div>
+                        </div>
+
+                        {/* Blast Radius & Micro-CIDR */}
+                        <div style={{ backgroundColor: '#0F172A', padding: '12px 14px', borderRadius: '8px', border: `1px solid ${theme.border}` }}>
+                          <div style={{ fontSize: '10px', color: theme.textMuted, textTransform: 'uppercase', marginBottom: '4px' }}>
+                            💥 Blast Radius & Micro-CIDR
+                          </div>
+                          <div style={{ fontSize: '13px', fontWeight: '800', color: blast?.badge_color === 'red' ? '#f87171' : blast?.badge_color === 'green' ? '#34d399' : '#fbbf24' }}>
+                            {blast?.risk_level?.replace(/_/g, ' ') || 'Normal'}
+                          </div>
+                          <div style={{ fontSize: '11px', color: theme.textMuted, marginTop: '4px', lineHeight: '1.4' }}>
+                            {blast?.recommendation || 'Monitor individual IPs.'}
+                          </div>
+                        </div>
+
+                      </div>
+
+                      {/* Clickable Malicious Host IPs */}
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '12px', fontWeight: '800', color: theme.accent }}>
+                            🎯 Observed Threat Host Endpoints ({p.sample_ips?.length || 0}):
+                          </span>
+                          <span style={{ fontSize: '11px', color: theme.textMuted }}>
+                            (Click any IP for 1-click microscopic threat pivot & firewall defense rule)
+                          </span>
+                        </div>
+                        {p.sample_ips && p.sample_ips.length > 0 ? (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                            {p.sample_ips.map((sIp) => (
+                              <button
+                                key={sIp}
+                                onClick={() => onPivotIp && onPivotIp(sIp)}
+                                title="Click to open deep microscopic threat intelligence report"
+                                style={{
+                                  fontFamily: 'monospace',
+                                  fontSize: '12px',
+                                  fontWeight: '700',
+                                  padding: '5px 10px',
+                                  borderRadius: '5px',
+                                  backgroundColor: '#450a0a',
+                                  color: '#f87171',
+                                  border: `1px solid #f8717188`,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s'
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#7f1d1d'; e.currentTarget.style.borderColor = '#f87171'; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#450a0a'; e.currentTarget.style.borderColor = '#f8717188'; }}
+                              >
+                                <span>⚠️ {sIp}</span>
+                                <span style={{
+                                  fontSize: '9px',
+                                  backgroundColor: '#020617',
+                                  color: theme.accent,
+                                  padding: '1px 5px',
+                                  borderRadius: '3px',
+                                  fontWeight: '700'
+                                }}>
+                                  Deep Pivot ↗
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <div style={{ color: theme.textMuted, fontSize: '11px', fontStyle: 'italic' }}>
+                            No individual host IPs recorded in sample for this block.
+                          </div>
+                        )}
+                      </div>
+
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
               );
             })}
           </tbody>
@@ -658,6 +1276,27 @@ function ASNThreatIntelModal({ asn, onClose, totalClassified }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('summary');
+  const [showGuideModal, setShowGuideModal] = useState(false);
+  const [pivotIp, setPivotIp] = useState(null);
+  const [pivotLoading, setPivotLoading] = useState(false);
+  const [pivotData, setPivotData] = useState(null);
+  const [pivotError, setPivotError] = useState(null);
+
+  const handlePivotIp = useCallback((ip) => {
+    setPivotIp(ip);
+    setPivotLoading(true);
+    setPivotError(null);
+    setPivotData(null);
+    axios.get(`/api/threat-intelligence?ip=${encodeURIComponent(ip)}`)
+      .then(res => {
+        setPivotData(res.data);
+        setPivotLoading(false);
+      })
+      .catch(err => {
+        setPivotError(err.response?.data?.detail || err.message || 'Failed to fetch host intelligence');
+        setPivotLoading(false);
+      });
+  }, []);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -765,6 +1404,18 @@ function ASNThreatIntelModal({ asn, onClose, totalClassified }) {
                   ⟳ Computing intelligence…
                 </span>
               )}
+              <button
+                onClick={() => setShowGuideModal(true)}
+                style={{
+                  background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                  border: '1px solid #38bdf8', color: '#fff',
+                  borderRadius: '6px', padding: '7px 14px',
+                  cursor: 'pointer', fontSize: '12px', fontWeight: '700',
+                  display: 'flex', alignItems: 'center', gap: '6px'
+                }}
+              >
+                ℹ️ Threat Intel & FireHOL Guide
+              </button>
               <button onClick={onClose} style={{
                 background: 'transparent', border: `1px solid ${theme.border}`,
                 color: theme.textMuted, borderRadius: '6px', padding: '7px 14px',
@@ -941,7 +1592,26 @@ function ASNThreatIntelModal({ asn, onClose, totalClassified }) {
                       Observed Threat Density = (Threat IPs / Prefix Size) × 100
                     </span>
                   </div>
-                  <PrefixTable prefixes={tiData.prefix_analysis} total={summary.total_threat_ips} />
+                  <PrefixTable
+                    prefixes={tiData.prefix_analysis}
+                    total={summary.total_threat_ips}
+                    onPivotIp={handlePivotIp}
+                    onOpenGuide={() => setShowGuideModal(true)}
+                  />
+                </div>
+              )}
+
+              {/* ── Coordinated Campaigns ────────────────────────────────────── */}
+              {activeTab === 'campaigns' && (
+                <div>
+                  <SectionHeader
+                    title="Coordinated Threat Campaign Fingerprints"
+                    subtitle="Multi-region BGP prefixes exhibiting synchronized behavioral profiles and shared attack vectors."
+                  />
+                  <CoordinatedCampaignsView
+                    campaigns={tiData.coordinated_campaigns}
+                    onOpenGuide={() => setShowGuideModal(true)}
+                  />
                 </div>
               )}
 

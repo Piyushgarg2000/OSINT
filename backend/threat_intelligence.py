@@ -193,6 +193,380 @@ def _extract_ip_features(item: dict) -> Optional[dict]:
     }
 
 
+# ── Advanced Threat Intelligence Analytics: Roles, Contagion & Blast Radius ──
+
+def _compute_tactical_role(cat_counts: dict, cat_pcts: dict, entropy: Optional[float], infra_type: str) -> dict:
+    """
+    Computes Tactical Role Assignment using multi-dimensional behavioral weighting,
+    Shannon entropy, and infrastructure context.
+    """
+    total = sum(cat_counts.values())
+    if total == 0:
+        return {
+            "role": "DORMANT_RESERVE",
+            "title": "No Threat Activity Detected",
+            "icon": "⚪",
+            "confidence": 0,
+            "badge_color": "gray",
+            "description": "No active threat behavioral flags observed in this prefix."
+        }
+
+    attacks_share = cat_pcts.get("attacks", 0.0)
+    anonymizer_share = cat_pcts.get("anonymizers", 0.0)
+    malware_share = cat_pcts.get("malware", 0.0)
+    spam_share = cat_pcts.get("spam", 0.0)
+    abuse_share = cat_pcts.get("abuse", 0.0)
+
+    # Multi-dimensional decision tree
+    if malware_share >= 35.0:
+        return {
+            "role": "C2_WEAPON_STAGING",
+            "title": "Malware Command Center",
+            "icon": "☣️",
+            "confidence": min(98, round(malware_share + 25)),
+            "badge_color": "red",
+            "description": f"Dominant malware staging ({malware_share}%). Acts as command-and-control distribution hub."
+        }
+    elif (attacks_share + abuse_share) >= 50.0:
+        return {
+            "role": "ACTIVE_EXPLOIT_HUB",
+            "title": "Active Attack Source (Brute-force)",
+            "icon": "⚔️",
+            "confidence": min(96, round(attacks_share + abuse_share)),
+            "badge_color": "red",
+            "description": f"High exploitation intensity ({attacks_share}% attacks, {abuse_share}% abuse reports). Concentrated credential stuffing or RCE attempts."
+        }
+    elif anonymizer_share >= 40.0:
+        return {
+            "role": "PROXY_MASKING_FLEET",
+            "title": "VPN / Proxy Hiding Network",
+            "icon": "🎭",
+            "confidence": min(95, round(anonymizer_share + 20)),
+            "badge_color": "purple",
+            "description": f"Tor exit nodes, VPN exits, or proxies ({anonymizer_share}%). Used to obscure attacker origin identity."
+        }
+    elif spam_share >= 40.0:
+        return {
+            "role": "RECON_CRAWLER_FLEET",
+            "title": "Network Scanner / Spy Bot",
+            "icon": "🔍",
+            "confidence": min(92, round(spam_share + 20)),
+            "badge_color": "cyan",
+            "description": f"Dominant web crawling and automated scanning ({spam_share}%). Probing for application-layer vulnerabilities."
+        }
+    elif entropy is not None and entropy >= 1.5:
+        return {
+            "role": "MULTI_VECTOR_HYBRID",
+            "title": "Mixed Attack Type (Multiple Methods)",
+            "icon": "⚡",
+            "confidence": 85,
+            "badge_color": "amber",
+            "description": f"High Shannon entropy ({entropy}). Diverse multi-vector attacks indicating distributed botnet or multi-tenant breach."
+        }
+    else:
+        dominant = max(cat_counts, key=cat_counts.get) if cat_counts else "General"
+        return {
+            "role": f"SPECIALIZED_{dominant.upper()}",
+            "title": f"Specialized {dominant.capitalize()} Cluster",
+            "icon": "🎯",
+            "confidence": round(cat_pcts.get(dominant, 50.0)),
+            "badge_color": "blue",
+            "description": f"Focused malicious activity centered around {dominant} ({cat_pcts.get(dominant, 50.0)}%)."
+        }
+
+
+def _compute_subnet_contagion(threat_ips: list) -> dict:
+    """
+    Computes Subnet Contagion & Infiltration Index across /24 subnets.
+    Distinguishes isolated host compromises from widespread lateral tenant infections.
+    """
+    if not threat_ips:
+        return {
+            "score": 0.0,
+            "unique_subnets": 0,
+            "total_threats": 0,
+            "subnets_sample": [],
+            "status": "CLEAN",
+            "label": "Clean Subnets",
+            "color": "green",
+            "interpretation": "No active threat IPs detected in subnets."
+        }
+
+    subnets = set()
+    for ip in threat_ips:
+        parts = ip.strip().split(".")
+        if len(parts) == 4:
+            subnets.add(".".join(parts[:3]) + ".0/24")
+
+    u_count = len(subnets)
+    t_count = len(threat_ips)
+
+    if u_count == 1:
+        score = 15.0 if t_count == 1 else 25.0
+        status = "ISOLATED_COMPROMISE"
+        label = "Single Point — Only 1 Block Affected"
+        color = "cyan"
+        interp = f"All {t_count} threat IPs reside in a single /24 subnet ({list(subnets)[0]}). Indicates an isolated compromised host or single tenant."
+    else:
+        dispersion = u_count / max(1, t_count)
+        score = min(100.0, round((u_count * 15.0) + (dispersion * 30.0), 1))
+        if score >= 60.0:
+            status = "WIDESPREAD_CONTAGION"
+            label = "Many Blocks Hit — Widespread Spread"
+            color = "red"
+            interp = f"Infection spread across {u_count} distinct /24 subnets. Strong evidence of lateral movement or VPC tenant compromise."
+        else:
+            status = "MODERATE_SPREAD"
+            label = "Few Blocks Affected — Moderate Spread"
+            color = "amber"
+            interp = f"Threat IPs detected in {u_count} separate /24 subnets within the prefix block."
+
+    return {
+        "score": score,
+        "unique_subnets": u_count,
+        "total_threats": t_count,
+        "subnets_sample": sorted(list(subnets))[:4],
+        "status": status,
+        "label": label,
+        "color": color,
+        "interpretation": interp
+    }
+
+
+def _minimal_enclosing_cidr(ips: list) -> str:
+    """Computes the minimal enclosing CIDR block that covers all given IPv4 addresses."""
+    if not ips:
+        return "N/A"
+    try:
+        import ipaddress
+        ip_objs = [ipaddress.ip_address(ip) for ip in ips]
+        min_ip = min(ip_objs)
+        max_ip = max(ip_objs)
+        min_bin = f"{int(min_ip):032b}"
+        max_bin = f"{int(max_ip):032b}"
+        common_len = 0
+        for b1, b2 in zip(min_bin, max_bin):
+            if b1 == b2:
+                common_len += 1
+            else:
+                break
+        network = ipaddress.ip_network(f"{min_ip}/{common_len}", strict=False)
+        return str(network)
+    except Exception:
+        parts = ips[0].split(".")
+        return f"{parts[0]}.{parts[1]}.{parts[2]}.0/24"
+
+
+def _compute_blast_radius(prefix: str, prefix_size: int, threat_ips: list, all_ips: list = None) -> dict:
+    """
+    Computes Blast Radius & Tiered Quarantine Strategy (Micro-CIDR Calculator).
+    Prevents blackholing millions of benign cloud hosts and computes safe micro-CIDR bounds.
+    Never returns the massive macro prefix as the micro-quarantine target.
+    """
+    from collections import Counter
+    import ipaddress
+
+    candidate_ips = threat_ips if threat_ips else (all_ips or [])
+    threat_count = len(threat_ips)
+    candidate_count = len(candidate_ips)
+
+    if prefix_size <= 0:
+        return {
+            "collateral_risk_pct": 0.0,
+            "risk_level": "UNKNOWN",
+            "macro_cidr": prefix,
+            "macro_size": 0,
+            "micro_cidr": "N/A",
+            "micro_size": 0,
+            "verdict": "MONITOR_ONLY",
+            "badge_color": "gray",
+            "recommendation": "Prefix size unknown. Monitor individual IPs."
+        }
+
+    innocent_ips = max(0, prefix_size - threat_count)
+    collateral_pct = round((innocent_ips / prefix_size) * 100, 2)
+
+    if not candidate_ips:
+        return {
+            "collateral_risk_pct": collateral_pct,
+            "innocent_ip_count": innocent_ips,
+            "macro_cidr": prefix,
+            "macro_size": prefix_size,
+            "micro_cidr": "N/A",
+            "micro_size": 0,
+            "verdict": "NO_ACTIVE_THREATS",
+            "risk_level": "✅ No Threats to Quarantine",
+            "badge_color": "green",
+            "recommendation": f"No active threats detected in macro prefix {prefix}."
+        }
+
+    # 1. Group candidate IPs into /24 subnets
+    subnet_counts = Counter()
+    for ip in candidate_ips:
+        parts = ip.strip().split(".")
+        if len(parts) == 4:
+            subnet_counts[f"{parts[0]}.{parts[1]}.{parts[2]}.0/24"] += 1
+
+    unique_subnets = sorted(list(subnet_counts.keys()))
+    dominant_subnet = subnet_counts.most_common(1)[0][0] if subnet_counts else "N/A"
+    dominant_subnet_threats = subnet_counts[dominant_subnet] if dominant_subnet != "N/A" else 0
+
+    # 2. Check if all candidate IPs share a tight enclosing subnet (prefix length >= 20, <= 4096 IPs)
+    # AND that enclosing subnet is strictly smaller than the macro prefix
+    macro_prefix_len = 0
+    if "/" in prefix:
+        try:
+            macro_prefix_len = int(prefix.split("/")[1])
+        except Exception:
+            pass
+
+    enclosing_cidr = _minimal_enclosing_cidr(candidate_ips)
+    enclosing_len = 0
+    if "/" in enclosing_cidr:
+        try:
+            enclosing_len = int(enclosing_cidr.split("/")[1])
+        except Exception:
+            pass
+
+    # A CIDR is truly "micro" if:
+    # - It is strictly more specific than the macro prefix (enclosing_len > macro_prefix_len)
+    # - AND its prefix length is >= 20 (meaning <= 4,096 IPs total)
+    if enclosing_len >= 20 and enclosing_len > macro_prefix_len:
+        if candidate_count == 1:
+            # Single IP -> target its /24 micro-subnet
+            micro_cidr = dominant_subnet
+            micro_size = 256
+            micro_collateral = max(0, micro_size - threat_count)
+            verdict = "QUARANTINE_MICRO_CIDR"
+            risk_level = "✅ Safe to Block This Small Range"
+            badge_color = "green"
+            rec = f"Threat is isolated to single subnet {dominant_subnet}. Quarantine this /24 block (256 IPs) or drop host {candidate_ips[0]}/32 to prevent collateral damage."
+        else:
+            micro_cidr = enclosing_cidr
+            micro_size = _prefix_size(enclosing_cidr)
+            micro_collateral = max(0, micro_size - threat_count)
+            verdict = "QUARANTINE_MICRO_CIDR"
+            risk_level = "✅ Safe to Block This Small Range"
+            badge_color = "green"
+            rec = f"Threats are concentrated in Micro-CIDR {micro_cidr} ({micro_size} IPs). Quarantine this block to isolate {threat_count} threats with only {micro_collateral} safe hosts affected."
+    else:
+        # Threats are dispersed across different subnets in a huge macro prefix!
+        # NEVER return the massive macro prefix! Target the specific /24 hotspot subnets!
+        if len(unique_subnets) == 1:
+            micro_cidr = dominant_subnet
+            micro_size = 256
+            micro_collateral = max(0, 256 - threat_count)
+            verdict = "QUARANTINE_MICRO_CIDR"
+            risk_level = "✅ Safe to Block This Small Range"
+            badge_color = "green"
+            rec = f"All threats reside in subnet {dominant_subnet}. Quarantine this micro-subnet (256 IPs) rather than the {prefix_size:,}-IP macro prefix."
+        else:
+            # Multiple subnets dispersed across the macro prefix
+            micro_cidr = f"{dominant_subnet} (+{len(unique_subnets)-1} subnets)"
+            micro_size = len(unique_subnets) * 256
+            verdict = "DO_NOT_BLOCK_MACRO_CIDR"
+            risk_level = "⚠️ Blocking Would Hurt Many Innocent Servers"
+            badge_color = "red"
+            subnets_str = ", ".join(unique_subnets[:3]) + (f" and {len(unique_subnets)-3} more" if len(unique_subnets) > 3 else "")
+            rec = f"Blocking full CIDR ({prefix}) will terminate {innocent_ips:,} innocent hosts ({collateral_pct}% collateral damage). Threats are dispersed; quarantine the {len(unique_subnets)} specific /24 subnets instead ({subnets_str})."
+
+    return {
+        "collateral_risk_pct": collateral_pct,
+        "innocent_ip_count": innocent_ips,
+        "macro_cidr": prefix,
+        "macro_size": prefix_size,
+        "micro_cidr": micro_cidr,
+        "primary_subnet": dominant_subnet,
+        "quarantine_subnets": unique_subnets,
+        "micro_size": micro_size,
+        "verdict": verdict,
+        "risk_level": risk_level,
+        "badge_color": badge_color,
+        "recommendation": rec
+    }
+
+
+def _detect_coordinated_campaigns(prefix_list: list, asn: str) -> list:
+    """
+    Detects cross-prefix coordinated threat campaigns using Adaptive Pareto Selection
+    and weighted category profile similarity.
+    """
+    candidates = [
+        p for p in prefix_list
+        if p.get("threat_ip_count", 0) >= 2 and p.get("prefix") != "Prefix Unavailable"
+    ]
+    if len(candidates) < 2:
+        return []
+
+    candidates.sort(key=lambda x: x["threat_ip_count"], reverse=True)
+
+    total_threats = sum(p["threat_ip_count"] for p in candidates)
+    selected = []
+    cumulative = 0
+    for p in candidates:
+        selected.append(p)
+        cumulative += p["threat_ip_count"]
+        if (cumulative / max(1, total_threats)) >= 0.80 and len(selected) >= 3:
+            break
+        if len(selected) >= 15:
+            break
+
+    campaigns = []
+    paired = set()
+    campaign_idx = 1
+
+    for i in range(len(selected)):
+        for j in range(i + 1, len(selected)):
+            p1 = selected[i]
+            p2 = selected[j]
+            pair_key = tuple(sorted([p1["prefix"], p2["prefix"]]))
+            if pair_key in paired:
+                continue
+
+            c1 = p1.get("category_pcts", {})
+            c2 = p2.get("category_pcts", {})
+
+            all_cats = set(c1.keys()) | set(c2.keys())
+            if not all_cats:
+                continue
+
+            intersection = sum(min(c1.get(cat, 0.0), c2.get(cat, 0.0)) for cat in all_cats)
+            union = sum(max(c1.get(cat, 0.0), c2.get(cat, 0.0)) for cat in all_cats)
+            similarity = round((intersection / union) * 100, 1) if union > 0 else 0.0
+
+            if similarity >= 60.0 and p1.get("dominant_category") == p2.get("dominant_category"):
+                paired.add(pair_key)
+                dom = p1.get("dominant_category") or "THREAT"
+                campaigns.append({
+                    "campaign_id": f"CAMP-{asn.replace('AS', '')}-{dom.upper()}-{campaign_idx:02d}",
+                    "similarity_pct": similarity,
+                    "dominant_vector": dom,
+                    "target_infra": p1.get("top_infra_key", "CLOUD"),
+                    "prefixes": [
+                        {
+                            "prefix": p1["prefix"],
+                            "threat_count": p1["threat_ip_count"],
+                            "role": p1.get("tactical_role", {}).get("title"),
+                            "dominant_cat": p1.get("dominant_category")
+                        },
+                        {
+                            "prefix": p2["prefix"],
+                            "threat_count": p2["threat_ip_count"],
+                            "role": p2.get("tactical_role", {}).get("title"),
+                            "dominant_cat": p2.get("dominant_category")
+                        }
+                    ],
+                    "evidence": f"Synchronized {dom} attack vector ({similarity}% behavioral profile match) active across independent routing boundaries."
+                })
+                campaign_idx += 1
+                if len(campaigns) >= 6:
+                    break
+        if len(campaigns) >= 6:
+            break
+
+    return campaigns
+
+
 def _prefix_analysis(features: list) -> list:
     """
     Group IPs by BGP-announced prefix and compute per-prefix metrics.
@@ -206,20 +580,24 @@ def _prefix_analysis(features: list) -> list:
         if p not in prefix_map:
             prefix_map[p] = {
                 "prefix":     p,
-                "ip_list":    [],
+                "all_ips":    [],
+                "threat_ips": [],
                 "categories": defaultdict(int),
                 "countries":  defaultdict(int),
                 "infra_keys": defaultdict(int),
             }
-        prefix_map[p]["ip_list"].append(f["ip"])
-        for cat in f["categories"]:
-            prefix_map[p]["categories"][cat] += 1
+        prefix_map[p]["all_ips"].append(f["ip"])
+        if f.get("categories"):
+            prefix_map[p]["threat_ips"].append(f["ip"])
+            for cat in f["categories"]:
+                prefix_map[p]["categories"][cat] += 1
         prefix_map[p]["countries"][f["country"]] += 1
         prefix_map[p]["infra_keys"][f["infra_key"]] += 1
 
     results = []
     for prefix, data in prefix_map.items():
-        count       = len(data["ip_list"])
+        actual_threats = len(data["threat_ips"])
+        count = actual_threats if actual_threats > 0 else len(data["all_ips"])
         cat_counts  = dict(data["categories"])
         cat_total   = sum(cat_counts.values())
         cat_pcts    = {c: _safe_pct(n, cat_total) for c, n in cat_counts.items()}
@@ -227,7 +605,6 @@ def _prefix_analysis(features: list) -> list:
         n_cats      = len(cat_counts)
         entropy     = _shannon_entropy(cat_counts, cat_total)
 
-        # Prefix size from CIDR  (0 if prefix unavailable)
         p_size      = _prefix_size(prefix) if prefix != "Prefix Unavailable" else 0
         density_pct = _safe_pct(count, p_size) if p_size > 0 else None
         d_class     = _density_class(density_pct) if density_pct is not None else "UNKNOWN"
@@ -235,9 +612,13 @@ def _prefix_analysis(features: list) -> list:
         top_country = max(data["countries"], key=data["countries"].get) if data["countries"] else "Unknown"
         top_infra   = max(data["infra_keys"], key=data["infra_keys"].get) if data["infra_keys"] else "UNKNOWN"
 
+        # Prioritize actual confirmed threat IPs as sample IPs
+        sample_candidates = data["threat_ips"] if data["threat_ips"] else data["all_ips"]
+
         results.append({
             "prefix":             prefix,
-            "threat_ip_count":    count,
+            "threat_ip_count":    actual_threats,
+            "total_observed_ips": len(data["all_ips"]),
             "prefix_size":        p_size,
             "threat_density_pct": density_pct,
             "density_class":      d_class,
@@ -250,7 +631,10 @@ def _prefix_analysis(features: list) -> list:
             "top_infra_key":      top_infra,
             "country_breakdown":  dict(data["countries"]),
             "infra_breakdown":    dict(data["infra_keys"]),
-            "sample_ips":         data["ip_list"][:5],   # First 5 IPs as evidence
+            "sample_ips":         sample_candidates[:5],
+            "tactical_role":      _compute_tactical_role(cat_counts, cat_pcts, entropy, top_infra),
+            "contagion_index":    _compute_subnet_contagion(data["threat_ips"]),
+            "blast_radius":       _compute_blast_radius(prefix, p_size, data["threat_ips"], data["all_ips"]),
         })
 
     results.sort(key=lambda x: x["threat_ip_count"], reverse=True)
@@ -776,21 +1160,22 @@ def _compute_asn_intelligence(asn: str) -> dict:
     collected: list = []
     lock = threading.Lock()
 
+    import boto3.dynamodb.conditions as conditions
     def _scan_segment(seg):
         seg_items = []
-        kwargs = {"Segment": seg, "TotalSegments": TOTAL_SEGMENTS}
+        kwargs = {
+            "Segment": seg, 
+            "TotalSegments": TOTAL_SEGMENTS,
+            "FilterExpression": conditions.Attr("search_results.bgp_info.asn").eq(asn),
+            "ProjectionExpression": "ip, search_results.bgp_info, search_results.ripestat, search_results.geography, search_results.behavioral_flags"
+        }
         while True:
             resp = table.scan(**kwargs)
             for item in resp.get("Items", []):
                 ip_val = str(item.get("ip", ""))
-                if ip_val.startswith("__") or "search_results" not in item:
+                if ip_val.startswith("__"):
                     continue
-                # Quick ASN pre-filter using raw attribute to avoid full _from_dynamo on every item
-                sr_raw = item.get("search_results", {})
-                bgp_raw = sr_raw.get("bgp_info", {}) if isinstance(sr_raw, dict) else {}
-                item_asn = bgp_raw.get("asn", "") if isinstance(bgp_raw, dict) else ""
-                if str(item_asn).upper() == asn:
-                    seg_items.append(item)
+                seg_items.append(item)
             if "LastEvaluatedKey" not in resp:
                 break
             kwargs["ExclusiveStartKey"] = resp["LastEvaluatedKey"]
@@ -831,6 +1216,9 @@ def _compute_asn_intelligence(asn: str) -> dict:
         asn, total, prefix_list, concentration,
         category_dist, geo_dist, infra_dist, temporal
     )
+
+    # ── Advanced Threat Campaigns ──────────────────────────────────────────────
+    coordinated_campaigns = _detect_coordinated_campaigns(prefix_list, asn)
 
     # ── Summary metrics ────────────────────────────────────────────────────────
     unique_prefixes    = len([p for p in prefix_list if p["prefix"] != "Prefix Unavailable"])
@@ -878,6 +1266,7 @@ def _compute_asn_intelligence(asn: str) -> dict:
         "temporal_analysis":       temporal,
         "category_heatmap":        heatmap,
         "findings":                findings,
+        "coordinated_campaigns":   coordinated_campaigns,
     }
 
 
@@ -900,4 +1289,5 @@ def _insufficient_data(asn: str, reason: str) -> dict:
         "temporal_analysis":          {"available": False, "reason": reason},
         "category_heatmap":           {"categories": [], "rows": []},
         "findings":                   [],
+        "coordinated_campaigns":      [],
     }
